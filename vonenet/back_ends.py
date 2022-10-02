@@ -303,14 +303,56 @@ class CORblock_S(nn.Module):
 
         return output
 
-
+'''
+Recurrent Cornet-S
+'''
 class CORnetSBackEnd(nn.Module):
     def __init__(self, num_classes=1000):
         super(CORnetSBackEnd, self).__init__()
+        
 
         self.V2 = CORblock_S(64, 128, times=2)
         self.V4 = CORblock_S(128, 256, times=4)
         self.IT = CORblock_S(256, 512, times=2)
+        
+        self.decoder = nn.Sequential(OrderedDict([
+            ('avgpool', nn.AdaptiveAvgPool2d(1)),
+            ('flatten', Flatten()),
+            ('linear', nn.Linear(512, num_classes)),
+            ('output', Identity())
+        ]))
+
+        # weight initialization
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+                m.weight.data.normal_(0, np.sqrt(2. / n))
+            # nn.Linear is missing here because I originally forgot
+            # to add it during the training of this network
+            elif isinstance(m, nn.BatchNorm2d):
+                m.weight.data.fill_(1)
+                m.bias.data.zero_()
+
+    def forward(self, x):
+        x = self.V2(x)
+        x = self.V4(x)
+        x = self.IT(x)
+        x = self.decoder(x)
+        return x
+
+'''
+Feedforward cornet-S
+'''
+class CORnetSBackEnd_FF(nn.Module):
+    def __init__(self, num_classes=10):
+        super(CORnetSBackEnd_FF, self).__init__()
+        
+        
+        #feedforward
+        self.V2 = CORblock_S(64, 128, times=1)
+        self.V4 = CORblock_S(128, 256, times=1)
+        self.IT = CORblock_S(256, 512, times=1)
+        
         self.decoder = nn.Sequential(OrderedDict([
             ('avgpool', nn.AdaptiveAvgPool2d(1)),
             ('flatten', Flatten()),

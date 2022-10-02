@@ -3,7 +3,7 @@ import os, argparse, time, subprocess, io, shlex, pickle, pprint
 import pandas as pd
 import numpy as np
 import tqdm
-import fire
+#import fire
 
 parser = argparse.ArgumentParser(description='ImageNet Training')
 ## General parameters
@@ -40,7 +40,7 @@ parser.add_argument('--weight_decay', default=1e-4, type=float,
 ## Model parameters
 parser.add_argument('--torch_seed', default=0, type=int,
                     help='seed for weights initializations and torch RNG')
-parser.add_argument('--model_arch', choices=['alexnet', 'resnet50', 'resnet50_at', 'cornets'], default='resnet50',
+parser.add_argument('--model_arch', choices=['alexnet', 'resnet50', 'resnet50_at', 'cornets','cornets_ff'], default='resnet50',
                     help='back-end model architecture to load')
 parser.add_argument('--normalization', choices=['vonenet', 'imagenet'], default='vonenet',
                     help='image normalization to apply to models')
@@ -243,7 +243,7 @@ def train(save_train_epochs=.2,  # how often save output during training
                 if save_model_steps is not None:
                     if global_step in save_model_steps:
                         torch.save(ckpt_data, os.path.join(FLAGS.output_path,
-                                                           f'epoch_{epoch:02d}.pth.tar'))
+                                                           f'{FLAGS.model_arch}_epoch_{epoch:02d}.pth.tar'))
 
             else:
                 if len(results) > 1:
@@ -378,6 +378,6 @@ def accuracy(output, target, topk=(1,)):
         res = [correct[:k].sum().item() for k in topk]
         return res
 
-
-if __name__ == '__main__':
-    fire.Fire(command=FIRE_FLAGS)
+train()
+#if __name__ == '__main__':
+#    fire.Fire(command=FIRE_FLAGS)
