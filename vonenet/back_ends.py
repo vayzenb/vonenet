@@ -344,7 +344,7 @@ class CORnetSBackEnd(nn.Module):
 Feedforward cornet-S
 '''
 class CORnetSBackEnd_FF(nn.Module):
-    def __init__(self, num_classes=10):
+    def __init__(self, num_classes=1000):
         super(CORnetSBackEnd_FF, self).__init__()
         
         
